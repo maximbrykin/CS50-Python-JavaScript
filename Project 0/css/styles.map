@@ -1,0 +1,12 @@
+{
+	"version": 3,
+	"file": "styles.css",
+	"sources": [
+		"../scss/styles.scss"
+	],
+	"sourcesContent": [
+		"$button-color: #f1f1f1;\r\n\r\n#top-right-links {\r\n    text-align: right;\r\n    margin: 10px 50px;\r\n}\r\n#top-right-links a {\r\n    padding-right: 10px;\r\n}\r\n#form {\r\n    margin: 0 100px;\r\n}\r\n#form, #logo {\r\n    text-align: center;\r\n}\r\n#logo {\r\n    padding: 200px 0 20px;\r\n}\r\n.round-corners{\r\n    border-radius: 24px;\r\n}\r\ninput.round-corners {\r\n    padding: 10px;\r\n    width: 50%;\r\n    border-width: 1px;\r\n    min-width: 300px;\r\n}\r\ninput.full-width {\r\n    width: 100%;\r\n    max-width: none;\r\n}\r\n.advanced-search-form > div {\r\n    text-align: left;\r\n    display: grid;\r\n    grid-template-columns: 20% 60% 20%;\r\n}\r\n.advanced-search-form > div > div {\r\n    padding: 10px;\r\n}\r\n#button {\r\n    background-color: $button-color;\r\n    margin: 30px;\r\n}\r\n#button.advanced-button {\r\n    background-color: #357ae8;\r\n    color: white;\r\n}\r\n\r\n@media screen and (max-width:981px) {\r\n    #top-right-links {\r\n        text-align: center;\r\n        display: grid;\r\n        grid-template-columns: 50% 50%;\r\n    }\r\n    #form {\r\n        margin: 0;\r\n    }\r\n}"
+	],
+	"names": [],
+	"mappings": ";AAEA,AAAA,gBAAgB,CAAC;EACb,UAAU,EAAE,KAAK;EACjB,MAAM,EAAE,SAAS;CACpB;;;AACD,AAAA,gBAAgB,CAAC,CAAC,CAAC;EACf,aAAa,EAAE,IAAI;CACtB;;;AACD,AAAA,KAAK,CAAC;EACF,MAAM,EAAE,OAAO;CAClB;;;AACD,AAAA,KAAK,EAAE,KAAK,CAAC;EACT,UAAU,EAAE,MAAM;CACrB;;;AACD,AAAA,KAAK,CAAC;EACF,OAAO,EAAE,YAAY;CACxB;;;AACD,AAAA,cAAc,CAAA;EACV,aAAa,EAAE,IAAI;CACtB;;;AACD,AAAA,KAAK,AAAA,cAAc,CAAC;EAChB,OAAO,EAAE,IAAI;EACb,KAAK,EAAE,GAAG;EACV,YAAY,EAAE,GAAG;EACjB,SAAS,EAAE,KAAK;CACnB;;;AACD,AAAA,KAAK,AAAA,WAAW,CAAC;EACb,KAAK,EAAE,IAAI;EACX,SAAS,EAAE,IAAI;CAClB;;;AACD,AAAA,qBAAqB,GAAG,GAAG,CAAC;EACxB,UAAU,EAAE,IAAI;EAChB,OAAO,EAAE,IAAI;EACb,qBAAqB,EAAE,WAAW;CACrC;;;AACD,AAAA,qBAAqB,GAAG,GAAG,GAAG,GAAG,CAAC;EAC9B,OAAO,EAAE,IAAI;CAChB;;;AACD,AAAA,OAAO,CAAC;EACJ,gBAAgB,EAxCL,OAAO;EAyClB,MAAM,EAAE,IAAI;CACf;;;AACD,AAAA,OAAO,AAAA,gBAAgB,CAAC;EACpB,gBAAgB,EAAE,OAAO;EACzB,KAAK,EAAE,KAAK;CACf;;AAED,MAAM,CAAC,MAAM,MAAM,SAAS,EAAE,KAAK;;EAC/B,AAAA,gBAAgB,CAAC;IACb,UAAU,EAAE,MAAM;IAClB,OAAO,EAAE,IAAI;IACb,qBAAqB,EAAE,OAAO;GACjC;;EACD,AAAA,KAAK,CAAC;IACF,MAAM,EAAE,CAAC;GACZ"
+}

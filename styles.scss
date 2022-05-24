@@ -1,0 +1,21 @@
+$color: red;
+
+div {
+    background-color: #ccc;
+}
+
+h1 {
+    color: $color;
+}
+
+%message {
+    font-size: 2 em;
+    color: green;
+}
+
+div {
+    @extend %message;
+    input {
+        background-color: $color;
+    }
+}
