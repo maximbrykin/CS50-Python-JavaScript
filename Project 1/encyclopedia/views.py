@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.urls import reverse
 from . import util
+import markdown2
 
 
 def index(request):
@@ -9,8 +11,7 @@ def index(request):
     })
 
 
-def entry_content(request):
+def entry_content(request, entry_name):
     return render(request, "encyclopedia/entry.html", {
-        "entry_content": util.get_entry("Python")
-    #return HttpResponse("Hi!")
+        "entry_content": markdown2.markdown(util.get_entry(entry_name))
     })

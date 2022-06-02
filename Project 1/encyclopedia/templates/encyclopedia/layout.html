@@ -19,10 +19,10 @@
                     <a href="{% url 'wiki:index' %}">Home</a>
                 </div>
                 <div>
-                    Create New Page
+                    <a href="{% url 'wiki:new-entry' %}">Create New Page</a>
                 </div>
                 <div>
-                    Random Page
+                    <a href="{% url 'wiki:random-entry' %}">Random Page</a>
                 </div>
                 {% block nav %}
                 {% endblock %}
