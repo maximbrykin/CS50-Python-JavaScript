@@ -1,12 +1,21 @@
 {% extends "encyclopedia/layout.html" %}
 
 {% block title %}
-    Search results Title
+    Search results for '{{ search_request }}'
 {% endblock %}
 
 {% block body %}
-    <h1>Search results Title</h1>
+    <h1>Search results for '{{ search_request }}':</h1>
 
-    Content is here...
+    {{ entry_content |safe}}
+
+    <ul>
+        {% for entry in entries %}
+            <li><a href="/wiki/{{ entry }}">{{ entry }}</a></li>
+        {% empty %}
+            <i>No entries.</i>
+            <p><- Please, type your request into the input field and press 'Enter'.</p>
+        {% endfor %}
+    </ul>
 
 {% endblock %}
