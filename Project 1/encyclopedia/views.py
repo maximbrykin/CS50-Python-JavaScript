@@ -92,6 +92,11 @@ def edit_entry(request, entry_name):
             title = request.POST.get('title')
             content = request.POST.get('content')
             util.save_entry(title, bytes(content, 'utf8'))
+
+            # Remove the preceding file if the title has changed
+            if title != entry_name:
+                util.remove_entry(entry_name)
+
             return HttpResponseRedirect(reverse("wiki:entry",args=(title,)))
         else:
             return render(request, "encyclopedia/new.html", {
