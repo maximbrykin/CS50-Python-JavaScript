@@ -44,3 +44,7 @@ textarea {
 .create {
     margin-top: 15px;
 }
+
+.hidden {
+    visibility: hidden;
+}

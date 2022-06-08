@@ -27,7 +27,8 @@ def entry(request, entry):
     else:
         return render(request, "encyclopedia/entry.html", {
             "entry_content": "The requested article on '" + entry +"' does not exist.",
-            "entry_name": entry
+            "entry_name": entry,
+            "hidden": "hidden"
         })
 
 
