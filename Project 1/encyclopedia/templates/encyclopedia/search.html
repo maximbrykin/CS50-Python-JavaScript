@@ -13,8 +13,8 @@
         {% for entry in entries %}
             <li><a href="/wiki/{{ entry }}">{{ entry }}</a></li>
         {% empty %}
-            <i>No entries.</i>
             <p><- Please, type your request into the input field and press 'Enter'.</p>
+            <div class="alert alert-warning">No entries.</div>
         {% endfor %}
     </ul>
 

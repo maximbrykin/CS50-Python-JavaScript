@@ -90,8 +90,8 @@ def edit_entry(request, entry_name):
     if request.method == "POST":
         form = CreateNewPageForm(request.POST)
         if form.is_valid():
-            title = request.POST.get('title')
-            content = request.POST.get('content')
+            title = form.cleaned_data["title"]
+            content = form.cleaned_data["content"]
             util.save_entry(title, bytes(content, 'utf8'))
 
             # Remove the preceding file if the title has changed
