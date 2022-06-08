@@ -36,3 +36,11 @@ textarea {
 .sidebar h2 {
     margin-top: 5px;
 }
+
+.form-control {
+    width: 80%;
+}
+
+.create {
+    margin-top: 15px;
+}

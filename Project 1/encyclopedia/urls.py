@@ -5,8 +5,9 @@ from . import views
 app_name = "wiki"
 urlpatterns = [
     path("", views.index, name="index"),
-    path("new-entry", views.new_content, name="new-entry"),
+    path("new", views.new, name="new"),
+    path("wiki/edit/<str:entry_name>", views.edit_entry, name="edit_entry"),
     path("search", views.search, name="search"),
-    path("random-entry", views.random_content, name="random-entry"),
-    path("wiki/<str:entry_name>", views.entry_content, name="url_name")
+    path("random", views.random_entry, name="random_entry"),
+    path("wiki/<str:entry>", views.entry, name="entry")
 ]
