@@ -5,12 +5,14 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
-from .models import User
+from .models import User, Category, Listing, Bid, Comment, Wishlist
 
 #@login_required(login_url='/login')
 
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html", {
+        "listings": Listing.objects.all()
+    })
 
 
 def login_view(request):
@@ -64,3 +66,28 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+
+# Categories List Page
+def categories(request):
+    return render(request, "auctions/categories.html", {
+        "categories": Category.objects.all()
+    })
+
+
+# Category Page
+def category(request, category_id):
+    category = Category.objects.get(pk=category_id)
+    return render(request, "auctions/category.html", {
+        "category": category.title,
+        "listings":  category.listings.all()
+    })
+
+# Item Page
+def item(request, item_id):
+    item = Listing.objects.get(pk=item_id)
+    bid = Bid.objects.get(pk=item_id)
+    return render(request, "auctions/item.html",{
+        "item": item,
+        "bid": bid
+    })

@@ -3,5 +3,14 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    <ul>
+    {% for listing in listings %}
+        {% if listing.active %}
+        <li><a href="item/{{ listing.id }}">{{ listing.title }}</a></li>
+        <!--        <li><a href="{% url 'item' listing.id %}">{{ listing.title }} : {{ listing.status }}</a></li>
+-->
+        {% endif %}
+    {% endfor %}
+
+</ul>
 {% endblock %}
