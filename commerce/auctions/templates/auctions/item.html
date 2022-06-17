@@ -2,10 +2,14 @@
 
 {% block body %}
 
+    <div class="alert hide {{ class }}">
+        {{ message }}
+    </div>
+
     <h2>{{ item.title }}</h2>
     
     <div>
-        <a href="/category/{{ item.category.title }}">{{ item.category.title }}</a>
+        <a href="/category/{{ item.category.id }}">{{ item.category.title }}</a>
     </div>
 
     <div>
@@ -13,7 +17,7 @@
         <i class="fa-regular fa-heart"></i>
     </div>
 
-
+    <br>
     
 
     <div class="row" id="item-info">
@@ -26,15 +30,25 @@
                         
             <h3>${{ bid.bid }}</h3> 
            
-            <form action="" type="">
-                <input type="text" placeholder="Bid" class="form-control" name="b">
+            <form action="{% url 'item' item.id %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" value="{{ item.title }}" name="item">
+                <input type="hidden" value="{{ user.username }}" name="participant">
+                <input type="text" placeholder="Bid" class="form-control" name="bid">
                 <input type="submit" value="Place Bid" class="btn btn-primary">
             </form>
                      
-            <p>Last bid: {{ bid.user }}</p>
-
-            <p>Listed by: {{ item.owner }}</p>
-
+            <p class="small-text">
+                Highest bid: {{ bid.user }}</br>
+                Listed by: {{ item.owner }}
+            </p>
+            <div>
+                <form action="{% url 'sell' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" value="{{ item.id }}" name="listing_id">
+                <input type="submit" value="Sell Listing" class="btn btn-success">
+            </form>
+            </div>                
         </div>
     </div>
     

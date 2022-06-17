@@ -2,9 +2,28 @@ body {
     padding: 10px;
 }
 
-#item-info img {
+#item-info img, .item-list img {
     text-align: center;
     width: 100%;
+    box-shadow: 0px 0px 10px 5px #33333312;
+}
+
+.item-list {
+    border: 1px dashed #eee;
+    padding: 10px;
+    margin: 10px;
+}
+
+.hide {
+    display: none;
+}
+
+.show {
+    display: block;
+}
+
+.small-text{
+    font-size: 12px;
 }
 
 .btn {
