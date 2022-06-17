@@ -25,9 +25,8 @@
             <img  src="{{ item.image_url }}" alt="{{ item.title }}" title="{{ item.title }}">
         </div>
         <div class="col-lg-3 col-md-6">
-
+            <h4>Active: {{ item.active }}</h4> 
             <p>{{ item.description }}</p>
-                        
             <h3>${{ bid.bid }}</h3> 
            
             <form action="{% url 'item' item.id %}" method="POST">
@@ -40,7 +39,7 @@
                      
             <p class="small-text">
                 Highest bid: {{ bid.user }}</br>
-                Listed by: {{ item.owner }}
+                Owned by: {{ item.owner }}
             </p>
             <div>
                 <form action="{% url 'sell' %}" method="POST">

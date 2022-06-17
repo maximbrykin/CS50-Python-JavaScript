@@ -3,7 +3,10 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-
+    <div class="alert hide {{ class }}">
+        {{ message }}
+    </div>
+    
         {% for listing in listings %}
             {% if listing.active %}
             <div class="row item-list">
@@ -18,7 +21,7 @@
                     <p class="small-text">Listed by: {{ listing.owner }}</p>
                     {{ listing.wishers }}
                     {{ listing.wishes }}
-                    {{ wishes }} 
+                    {{ message }} 
                 </div>
             </div>
             <!--        <li><a href="{% url 'item' listing.id %}">{{ listing.title }} : {{ listing.status }}</a></li>

@@ -100,11 +100,11 @@ def item(request, item_id):
         bid = Bid.objects.get(pk=item_id)
 
     # Show congratulations
-    if not item.active and item.owner == request.user:
-        return render(request, "auctions/item.html", {
-                    "message": "Congratulations! Your are the winner for this listing.",
-                    "class": "alert-primary show"
-                })
+    #if not item.active and item.owner == request.user:
+    #    return render(request, "auctions/index.html", {
+    #                "message": "Congratulations! Your are the winner for this listing.",
+    #                "class": "alert-success show"
+    #            })
 
     # Place a bid
     if request.method == "POST":
@@ -128,7 +128,7 @@ def item(request, item_id):
                 #    "class": "alert-primary show"
                 #})
             else:
-                return render(request, "auctions/item.html", {
+                return render(request, "auctions/item.html",  {   
                     "message": "Increase your bid.",
                     "class": "alert-warning show"
                 })
@@ -142,19 +142,20 @@ def item(request, item_id):
 
 def sell(request):
     if request.method == "POST":
+        item_id = int(request.POST["listing_id"])
+
         if request.user.is_authenticated:
-            item_id = int(request.POST["listing_id"])
             item = Listing.objects.get(pk=item_id)
-            
+            bid = Bid.objects.filter(listing=item).order_by("bid").last() 
             if item.owner == request.user:
                 if item.active: 
                     item.active = False
-                    item.owner = request.user
+                    item.owner = bid.user
                 else:
                     item.active = True
-                    item.save()
-        return HttpResponseRedirect(reverse("item",args=(item_id,)))
-
+                item.save()
+            return HttpResponseRedirect(reverse("item",args=(item_id,)))
+        return HttpResponseRedirect(reverse("login"))
     return HttpResponseRedirect(reverse("index"))
 
     '''
