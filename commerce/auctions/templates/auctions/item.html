@@ -13,8 +13,7 @@
     </div>
 
     <div>
-        Watchlist
-        <i class="fa-regular fa-heart"></i>
+        <a href="{% url 'add_to_watchlist' item.id %}">Watchlist <i class="{{ fa_style }} fa-heart "></i></a>
     </div>
 
     <br>

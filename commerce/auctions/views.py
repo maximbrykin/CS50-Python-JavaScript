@@ -3,12 +3,12 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Max, Count
 
-from .models import User, Category, Listing, Bid, Comment, Wishlist
+from .models import User, Category, Listing, Bid, Comment#, Watchlist
 
 #@login_required(login_url='/login')
 
@@ -88,9 +88,15 @@ def category(request, category_id):
 
 
 # Item Page
-def item(request, item_id):
+def show_item(request, item_id, **kwargs):
     item = Listing.objects.get(pk=item_id)
     
+    # Style a watchlist icon depending on the listings status
+    if request.user in item.wishers.all():
+        fa_style = "fa-solid"
+    else:
+        fa_style = "fa-regular"
+
     # If there are no bids - add the first bid equal to the starting price
     try:
         bid = Bid.objects.filter(listing=item).order_by("bid").last()    
@@ -128,15 +134,17 @@ def item(request, item_id):
                 #    "class": "alert-primary show"
                 #})
             else:
-                return render(request, "auctions/item.html",  {   
-                    "message": "Increase your bid.",
-                    "class": "alert-warning show"
-                })
+                request.session['message'] = "Increase your bid."
+                request.session['class'] = "alert-warning show"
+                #return HttpResponseRedirect(reverse("item",args=(item_id,)))
+                #kwargs = {"arg1" : "Geeks", "arg2" : "for", "arg3" : "Geeks"}
+                return HttpResponseRedirect(reverse("item",args=(item_id,)))
+                
         else:
             return HttpResponseRedirect(reverse("login"))
     return render(request, "auctions/item.html",{
         "item": item,
-        "bid": bid
+        "fa_style": fa_style
     })
 
 
@@ -164,3 +172,20 @@ def sell(request):
             "class": "alert-success show"
         })
     '''
+
+
+def watchlist(request):
+    listings = Listing.objects.filter(wishers=request.user)
+    return render(request, "auctions/watchlist.html", {
+        "listings": listings
+    })
+
+
+def add_to_watchlist(request, item_id):
+    item = Listing.objects.get(pk=item_id)
+    if request.user in item.wishers.all():
+        item.wishers.remove(request.user)
+    else:
+        item.wishers.add(request.user)
+    item.save()
+    return HttpResponseRedirect(reverse("item",args=(item_id,)))

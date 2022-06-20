@@ -27,6 +27,7 @@ class Listing(models.Model):
     def __str__(self):
         return f"{self.title}"
 
+
 class Bid(models.Model):
     bid = models.FloatField()
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="bid")
@@ -35,6 +36,7 @@ class Bid(models.Model):
     def __str__(self):
         return f"{self.listing} - {self.bid} - {self.user}"
 
+
 class Comment():
     comment = models.TextField()
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
@@ -42,6 +44,6 @@ class Comment():
 
   
 
-class Wishlist():
-    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="wishes")
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wishes")
+#class Watchlist():
+#    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="wishes")
+#    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wishes")
