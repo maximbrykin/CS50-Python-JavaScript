@@ -2,16 +2,12 @@
 
 {% block body %}
 
-    <div class="alert hide {{ class }}">
+    <div class="alert hide {{ message_class }}">
         {{ message }}
     </div>
 
     <h2>{{ item.title }}</h2>
-    
-    <div>
-        <a href="/category/{{ item.category.id }}">{{ item.category.title }}</a>
-    </div>
-
+   
     <div>
         <a href="{% url 'add_to_watchlist' item.id %}">Watchlist <i class="{{ fa_style }} fa-heart "></i></a>
     </div>
@@ -25,6 +21,7 @@
         </div>
         <div class="col-lg-3 col-md-6">
             <h4>Active: {{ item.active }}</h4> 
+            <p>Category: <a href="{% url 'category' item.category.id %}">{{ item.category.title }}</a></p>
             <p>{{ item.description }}</p>
             <h3>${{ bid.bid }}</h3> 
            
@@ -44,7 +41,7 @@
                 <form action="{% url 'sell' %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" value="{{ item.id }}" name="listing_id">
-                <input type="submit" value="Sell Listing" class="btn btn-success">
+                <input type="submit" value="Sell Listing" class="btn btn-success hide {{ button_class }}">
             </form>
             </div>                
         </div>

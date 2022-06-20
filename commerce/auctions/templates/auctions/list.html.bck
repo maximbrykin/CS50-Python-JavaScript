@@ -1,15 +1,6 @@
-{% extends "auctions/layout.html" %}
-
-
-{% block body %}
-    <h2>Active Listings</h2>
-
-    <div class="alert hide {{ class }}">
-        {{ message }}
-    </div>
-
+{% block list %}
+ 
     {% for listing in listings %}
-        {% if listing.active %}
             <div class="row item-list">
                 <div class="col-sm-3">
                         <a href="{% url 'item' listing.id %}"><img  src="{{ listing.image_url }}" alt="{{ listing.title }}" title="{{ item.title }}"></a>

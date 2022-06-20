@@ -9,22 +9,18 @@
     <h2>{{ user.username }}'s watchlist</h2>
     
     {% for listing in listings %}
-
-    <div class="row item-list">
-        <div class="col-sm-3">
-            <a href="item/{{ listing.id }}"><img  src="{{ listing.image_url }}" alt="{{ listing.title }}" title="{{ item.title }}"></a>
+        <div class="row item-list">
+            <div class="col-sm-3">
+                 <a href="{% url 'item' listing.id %}"><img  src="{{ listing.image_url }}" alt="{{ listing.title }}" title="{{ item.title }}"></a>
+            </div>
+            <div class="col-sm-6">
+                <h4>{{ listing.title }}</h4>
+                <p><a href="{% url 'category' listing.category.id %}">{{ listing.category.title }}</a></p>
+                <strong>Price:</strong> ${{ listing.bid.last }}
+                <p>{{ listing.description }}</p>
+                <p class="small-text">Listed by: {{ listing.owner }}</p>
+            </div>
         </div>
-        <div class="col-sm-6">
-            <h4>{{ listing.title }}</h4>
-            <p><a href="{% url 'category' listing.category.id %}">{{ listing.category.title }}</a></p>
-            <!--<p><a href="/category/{{ listing.category.id }}">{{ listing.category.title }}</a></p>-->
-            <strong>Price:</strong> ${{ listing.bid.last }}
-            <p>{{ listing.description }}</p>
-            <p class="small-text">Listed by: {{ listing.owner }}</p>
-        </div>
-    </div>
-
     {% endfor %}
-
 
 {% endblock %}

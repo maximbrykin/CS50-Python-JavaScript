@@ -3,14 +3,20 @@
 {% block body %}
     <h2>Category: "{{ category }}"</h2>
 
-    <ul>
-        {% for listing in listings %}
-        <li><a href="/item/{{ listing.id }}">{{ listing.title }}</a></li>
-        {% empty %}
-        No items.
-        {% endfor %}
-
-</ul>
+    {% for listing in listings %}
+        <div class="row item-list">
+            <div class="col-sm-3">
+                 <a href="{% url 'item' listing.id %}"><img  src="{{ listing.image_url }}" alt="{{ listing.title }}" title="{{ item.title }}"></a>
+            </div>
+            <div class="col-sm-6">
+                <h4>{{ listing.title }}</h4>
+                <p><a href="{% url 'category' listing.category.id %}">{{ listing.category.title }}</a></p>
+                <strong>Price:</strong> ${{ listing.bid.last }}
+                <p>{{ listing.description }}</p>
+                <p class="small-text">Listed by: {{ listing.owner }}</p>
+            </div>
+        </div>
+    {% endfor %}
 
 
 {% endblock %}
