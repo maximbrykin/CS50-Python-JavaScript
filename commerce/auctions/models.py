@@ -37,13 +37,10 @@ class Bid(models.Model):
         return f"{self.listing} - {self.bid} - {self.user}"
 
 
-class Comment():
+class Listing_Comment(models.Model):
     comment = models.TextField()
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
 
-  
-
-#class Watchlist():
-#    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="wishes")
-#    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="wishes")
+    def __str__(self):
+        return f"{self.comment}"

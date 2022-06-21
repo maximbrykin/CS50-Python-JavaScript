@@ -3,13 +3,11 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.db.models import Max, Count
 
-from .models import User, Category, Listing, Bid, Comment#, Watchlist
-
+from .models import User, Category, Listing, Bid, Listing_Comment
 
 
 def index(request):
@@ -90,36 +88,60 @@ def category(request, category_id):
 # Item Page
 def show_item(request, item_id, **kwargs):
     item = Listing.objects.get(pk=item_id)
-    
-    # Style a watchlist icon depending on the listings status
-    if request.user in item.wishers.all():
-        fa_style = "fa-solid"
-    else:
-        fa_style = "fa-regular"
+    fa_style = "fa-regular"
+    button_class = ''
+    message = ''
+    message_class = ''
+    comment_button_class = ''
 
-    # If there are no bids - add the first bid equal to the starting price
+    # Show authorized content
+    if request.user.is_authenticated:
+        # Style a watchlist icon depending on the listings status
+        if request.user in item.wishers.all():
+            fa_style = "fa-solid"
+        # Show Sell button to the listing's owner
+        if item.owner == request.user:
+            button_class = "show"
+        comment_button_class = "show"
+        # Show congratulations!
+        if not item.active and item.owner == bid.user and item.owner == request.user:
+            message = "Congratulations! Your are the winner."
+            message_class = "alert-success show"
+
+    # Show the latest bid
     try:
-        bid = Bid.objects.filter(listing=item).last()    
+        bid = Bid.objects.filter(listing=item).last()
+    # If there are no bids - add the first bid equal to the starting price    
     except ObjectDoesNotExist:
         init_bid = Bid.objects.create(bid=item.starting_price, listing=item, user=item.owner)
         init_bid.save()
         bid = Bid.objects.get(pk=item_id)
 
-    # Show congratulations!
-    message = ''
-    message_class = ''
-    if not item.active and item.owner == bid.user and item.owner == request.user:
-        message = "Congratulations! Your are the winner."
-        message_class = "alert-success show"
+    # Show comments
+    comments = Listing_Comment.objects.filter(listing=item)         
 
-    # Show Sell button to the listing's owner
-    button_class = ''
-    if item.owner == request.user:
-        button_class = "show"
+    # Show the listing page
+    return render(request, "auctions/item.html",{
+        "item": item,
+        "bid": bid,
+        "fa_style": fa_style,
+        "message": message,
+        "message_class": message_class,
+        "button_class": button_class,
+        "comments": comments,
+        "comment_button_class": comment_button_class
+    })
 
-    # Place a bid
+
+def place_bid(request):
     if request.method == "POST":
         if request.user.is_authenticated:
+            item_id = int(request.POST["listing_id"])
+            item = Listing.objects.get(pk=int(request.POST["listing_id"]))
+            bid = Bid.objects.filter(listing=item).last()
+            # post = request.POST[]
+
+            # Place a bid
             try:
                 new_bid = float(request.POST["bid"])
             except ValueError:
@@ -128,10 +150,10 @@ def show_item(request, item_id, **kwargs):
                 #    "message": "Input a correct bid.",
                 #    "class": "alert-danger show"
                 #}))
-            if item.active == False:
-               return HttpResponseRedirect(reverse("item",args=(item_id,)))
+            if not item.active:
+                return HttpResponseRedirect(reverse("item",args=(item_id,)))
             elif (new_bid > bid.bid) or ((new_bid == item.starting_price) and (item.owner == bid.user)):
-                add_bid = Bid.objects.create(bid=new_bid, listing=item, user=request.user) #request.POST["participant"]")
+                add_bid = Bid.objects.create(bid=new_bid, listing=item, user=request.user)
                 add_bid.save()
                 return HttpResponseRedirect(reverse("item",args=(item_id,)))
                 #return render(request, "auctions/item.html", {
@@ -144,18 +166,8 @@ def show_item(request, item_id, **kwargs):
                 #return HttpResponseRedirect(reverse("item",args=(item_id,)))
                 #kwargs = {"arg1" : "Geeks", "arg2" : "for", "arg3" : "Geeks"}
                 return HttpResponseRedirect(reverse("item",args=(item_id,)))
-                
-        else:
-            return HttpResponseRedirect(reverse("login"))
     
-    return render(request, "auctions/item.html",{
-        "item": item,
-        "bid": bid,
-        "fa_style": fa_style,
-        "message": message,
-        "message_class": message_class,
-        "button_class": button_class
-    })
+    return HttpResponseRedirect(reverse("item",args=(item_id,)))
 
 
 def sell(request):
@@ -190,6 +202,7 @@ def watchlist(request):
         "listings": listings
     })
 
+
 @login_required(login_url='/login')
 def add_to_watchlist(request, item_id):
     item = Listing.objects.get(pk=item_id)
@@ -203,9 +216,24 @@ def add_to_watchlist(request, item_id):
     return HttpResponseRedirect(reverse("item",args=(item_id,)))
 
 
+def post_comment(request):
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            item_id = int(request.POST["listing_id"])
+            item = Listing.objects.get(pk=item_id)
+            comment = request.POST["comment"]
+            if comment:
+                add_comment = Listing_Comment.objects.create(comment=comment, listing=item, user=request.user)
+                add_comment.save()
+            return HttpResponseRedirect(reverse("item",args=(item_id,)))    
+        else:
+            return HttpResponseRedirect(reverse("login"))
+
+
 def notification(request,message):
     return render(request, "auctions/notifications.html", {
         "message": message,
         "back_url": "#"
     })
     return HttpResponseRedirect(reverse("item",args=(item_id,)))
+    
