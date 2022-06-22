@@ -172,15 +172,25 @@ def place_bid(request):
                 message_class = "alert-danger show"
                 return notification(request,message,message_class)
             
-            if (new_bid > bid.bid) or ((new_bid == item.starting_price) and (item.owner == bid.user)):
+            # If at least one bid exists, set new bid
+            if bid:
+                if new_bid > bid.bid:
+                    add_bid = Bid.objects.create(bid=new_bid, listing=item, user=request.user)
+                    add_bid.save()
+                    return HttpResponseRedirect(reverse("item",args=(item_id,)))
+                else:
+                    message = "Increase your bid."
+                    message_class = "alert-warning show"
+                    return notification(request,message,message_class)
+            # If there are no bids, but the new bid equals the starting price, set new bid
+            elif new_bid >= item.starting_price: 
                 add_bid = Bid.objects.create(bid=new_bid, listing=item, user=request.user)
                 add_bid.save()
                 return HttpResponseRedirect(reverse("item",args=(item_id,)))
             else:
                 message = "Increase your bid."
                 message_class = "alert-warning show"
-                return notification(request,message,message_class)
-                
+                return notification(request,message,message_class)   
         return HttpResponseRedirect(reverse("login"))    
     return HttpResponseRedirect(reverse("item",args=(item_id,)))
 
@@ -243,19 +253,9 @@ def create_item(request):
                 "form": form
             })
     return render(request, "auctions/change-item.html", {
-        "form": NewItemForm(),
-        "create_or_edit": "Create"
+        "form": NewItemForm()
     })    
 
-
-# Edit Listing
-def edit_item(request):
-    data = {""}
-    return render(request, "auctions/change-item.html", {
-        "form": NewItemForm(initial=data),
-        "create_or_edit": "Edit"
-    })
-    
 
 # Display Watchlist
 @login_required(login_url='/login')
