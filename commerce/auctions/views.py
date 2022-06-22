@@ -6,13 +6,23 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django import forms
 
 from .models import User, Category, Listing, Bid, Listing_Comment
 
 
+class NewItemForm(forms.Form):
+    title = forms.CharField(widget=forms.TextInput({"class":"form-control"}))
+    description = forms.CharField(widget=forms.Textarea({"class":"form-control"}), required=False)
+    imageurl = forms.URLField(widget=forms.URLInput({"class":"form-control"}), required=False)
+    starting_price = forms.FloatField(widget=forms.NumberInput(attrs={"class":"form-control"}),min_value=0)
+    category = forms.ModelChoiceField(queryset=Category.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}), to_field_name='title', empty_label="(Choose a category)")
+    
+
 def index(request):
     return render(request, "auctions/index.html", {
-        "listings": Listing.objects.all()
+        "listings": Listing.objects.all(),
+        "bids": Bid.objects.all()
     })
 
 
@@ -69,7 +79,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-# Categories List Page
+# Categories List
 def categories(request):
     return render(request, "auctions/categories.html", {
         "categories": Category.objects.all()
@@ -92,7 +102,6 @@ def show_item(request, item_id, **kwargs):
     button_class = ''
     message = ''
     message_class = ''
-    comment_button_class = ''
 
     # Show authorized content
     if request.user.is_authenticated:
@@ -100,13 +109,14 @@ def show_item(request, item_id, **kwargs):
         if request.user in item.wishers.all():
             fa_style = "fa-solid"
         # Show Sell button to the listing's owner
-        if item.owner == request.user:
+        if item.owner == request.user and Bid.objects.filter(listing=item):
             button_class = "show"
-        comment_button_class = "show"
-        # Show congratulations!
-        if not item.active and item.owner == bid.user and item.owner == request.user:
-            message = "Congratulations! Your are the winner."
-            message_class = "alert-success show"
+        # Show congratulations to the winner!
+        if Bid.objects.filter(listing=item):
+            bid=Bid.objects.filter(listing=item).last()
+            if not item.active and item.owner == bid.user and item.owner == request.user:
+                message = "Congratulations! Your are the winner."
+                message_class = "alert-success show"
 
     # Show the latest bid
     try:
@@ -128,15 +138,15 @@ def show_item(request, item_id, **kwargs):
         "message": message,
         "message_class": message_class,
         "button_class": button_class,
-        "comments": comments,
-        "comment_button_class": comment_button_class
+        "comments": comments
     })
 
 
+# Place Bid
 def place_bid(request):
     if request.method == "POST":
+        item_id = int(request.POST["listing_id"])
         if request.user.is_authenticated:
-            item_id = int(request.POST["listing_id"])
             item = Listing.objects.get(pk=int(request.POST["listing_id"]))
             bid = Bid.objects.filter(listing=item).last()
             # post = request.POST[]
@@ -166,10 +176,11 @@ def place_bid(request):
                 #return HttpResponseRedirect(reverse("item",args=(item_id,)))
                 #kwargs = {"arg1" : "Geeks", "arg2" : "for", "arg3" : "Geeks"}
                 return HttpResponseRedirect(reverse("item",args=(item_id,)))
-    
+        return HttpResponseRedirect(reverse("login"))    
     return HttpResponseRedirect(reverse("item",args=(item_id,)))
 
 
+# Sell Listing
 def sell(request):
     if request.method == "POST":
         item_id = int(request.POST["listing_id"])
@@ -180,7 +191,8 @@ def sell(request):
             if item.owner == request.user:
                 if item.active: 
                     item.active = False
-                    item.owner = bid.user
+                    if bid:
+                        item.owner = bid.user
                 else:
                     item.active = True
                 item.save()
@@ -195,6 +207,55 @@ def sell(request):
         })
     '''
 
+# Add Comment
+def post_comment(request):
+    if request.method == "POST":
+        if request.user.is_authenticated:
+            item_id = int(request.POST["listing_id"])
+            item = Listing.objects.get(pk=item_id)
+            comment = request.POST["comment"]
+            if comment:
+                add_comment = Listing_Comment.objects.create(comment=comment, listing=item, user=request.user)
+                add_comment.save()
+            return HttpResponseRedirect(reverse("item",args=(item_id,)))    
+    return HttpResponseRedirect(reverse("login"))
+
+
+# Create Listing
+def create_item(request):
+    if request.method == "POST":
+        form = NewItemForm(request.POST)
+        if form.is_valid():
+            title = form.cleaned_data["title"]
+            description = form.cleaned_data["description"]
+            imageurl = form.cleaned_data["imageurl"]
+            starting_price = form.cleaned_data["starting_price"]
+            active = True
+            category = form.cleaned_data["category"]
+            owner = request.user
+            create_listing = Listing.objects.create(title=title, description=description, image_url=imageurl, starting_price=starting_price, active=active, category=category, owner=owner)
+            create_listing.save()
+            return HttpResponseRedirect(reverse("index"))
+        else:
+            return render(request, "auctions/change-item.html", {
+                "form": form
+            })
+    return render(request, "auctions/change-item.html", {
+        "form": NewItemForm(),
+        "create_or_edit": "Create"
+    })    
+
+
+# Edit Listing
+def edit_item(request):
+    data = {""}
+    return render(request, "auctions/change-item.html", {
+        "form": NewItemForm(initial=data),
+        "create_or_edit": "Edit"
+    })
+    
+
+# Display Watchlist
 @login_required(login_url='/login')
 def watchlist(request):
     listings = Listing.objects.filter(wishers=request.user)
@@ -203,6 +264,7 @@ def watchlist(request):
     })
 
 
+# Add to Watchlist
 @login_required(login_url='/login')
 def add_to_watchlist(request, item_id):
     item = Listing.objects.get(pk=item_id)
@@ -214,22 +276,9 @@ def add_to_watchlist(request, item_id):
     message = "DONE!"
     notification(request,message)
     return HttpResponseRedirect(reverse("item",args=(item_id,)))
+  
 
-
-def post_comment(request):
-    if request.method == "POST":
-        if request.user.is_authenticated:
-            item_id = int(request.POST["listing_id"])
-            item = Listing.objects.get(pk=item_id)
-            comment = request.POST["comment"]
-            if comment:
-                add_comment = Listing_Comment.objects.create(comment=comment, listing=item, user=request.user)
-                add_comment.save()
-            return HttpResponseRedirect(reverse("item",args=(item_id,)))    
-        else:
-            return HttpResponseRedirect(reverse("login"))
-
-
+# Show notifications
 def notification(request,message):
     return render(request, "auctions/notifications.html", {
         "message": message,

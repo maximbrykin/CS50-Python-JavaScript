@@ -11,7 +11,7 @@
             <div class="col-sm-6">
                 <h4>{{ listing.title }}</h4>
                 <p><a href="{% url 'category' listing.category.id %}">{{ listing.category.title }}</a></p>
-                <strong>Price:</strong> ${{ listing.bid.last }}
+                <strong>Price:</strong> ${% if listing.bid.last %}{{ listing.bid.last }}{% else %}{{ listing.starting_price }}{% endif %}
                 <p>{{ listing.description }}</p>
                 <p class="small-text">Listed by: {{ listing.owner }}</p>
             </div>

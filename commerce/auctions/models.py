@@ -34,7 +34,8 @@ class Bid(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bid")
 
     def __str__(self):
-        return f"{self.listing} - {self.bid} - {self.user}"
+        #return f"{self.listing} - {self.bid} - {self.user}"
+        return f"{self.bid}"
 
 
 class Listing_Comment(models.Model):
