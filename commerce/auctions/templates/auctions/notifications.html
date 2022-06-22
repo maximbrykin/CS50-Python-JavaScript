@@ -2,12 +2,8 @@
 
 {% block body %}
 
-    <div class="alert hide {{ class }}">
+    <div class="alert hide {{ message_class }}">
         {{ message }}
     </div>  
-    <div>
-        <a href="{{ back_url }}">Go Back</a>
-    </div>
-    
-  
+ 
 {% endblock %}

@@ -16,7 +16,8 @@ class NewItemForm(forms.Form):
     description = forms.CharField(widget=forms.Textarea({"class":"form-control"}), required=False)
     imageurl = forms.URLField(widget=forms.URLInput({"class":"form-control"}), required=False)
     starting_price = forms.FloatField(widget=forms.NumberInput(attrs={"class":"form-control"}),min_value=0)
-    category = forms.ModelChoiceField(queryset=Category.objects.all(), widget=forms.Select(attrs={'class': 'form-control'}), to_field_name='title', empty_label="(Choose a category)")
+    category = forms.ModelChoiceField(queryset=Category.objects.all(),
+    widget=forms.Select(attrs={'class': 'form-control'}), to_field_name='title', empty_label="(Choose a category)")
     
 
 def index(request):
@@ -79,6 +80,14 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
+# Show notifications
+def notification(request,message,message_class):
+    return render(request, "auctions/notifications.html", {
+        "message": message,
+        "message_class": message_class
+    })
+    
+
 # Categories List
 def categories(request):
     return render(request, "auctions/categories.html", {
@@ -95,7 +104,7 @@ def category(request, category_id):
     })
 
 
-# Item Page
+# Listing Page
 def show_item(request, item_id, **kwargs):
     item = Listing.objects.get(pk=item_id)
     fa_style = "fa-regular"
@@ -130,7 +139,7 @@ def show_item(request, item_id, **kwargs):
     # Show comments
     comments = Listing_Comment.objects.filter(listing=item)         
 
-    # Show the listing page
+    # Render Listing page
     return render(request, "auctions/item.html",{
         "item": item,
         "bid": bid,
@@ -149,33 +158,29 @@ def place_bid(request):
         if request.user.is_authenticated:
             item = Listing.objects.get(pk=int(request.POST["listing_id"]))
             bid = Bid.objects.filter(listing=item).last()
-            # post = request.POST[]
 
-            # Place a bid
+            if not item.active:
+                message = "Activate the Listing by clicking the 'Sell Listing' button."
+                message_class = "alert-warning show"
+                return notification(request,message,message_class)
+            
+            # Error if Bid is not a number
             try:
                 new_bid = float(request.POST["bid"])
             except ValueError:
-                return HttpResponseRedirect(reverse("item",args=(item_id,)))
-                #, kwargs={
-                #    "message": "Input a correct bid.",
-                #    "class": "alert-danger show"
-                #}))
-            if not item.active:
-                return HttpResponseRedirect(reverse("item",args=(item_id,)))
-            elif (new_bid > bid.bid) or ((new_bid == item.starting_price) and (item.owner == bid.user)):
+                message = "Input a correct bid."
+                message_class = "alert-danger show"
+                return notification(request,message,message_class)
+            
+            if (new_bid > bid.bid) or ((new_bid == item.starting_price) and (item.owner == bid.user)):
                 add_bid = Bid.objects.create(bid=new_bid, listing=item, user=request.user)
                 add_bid.save()
                 return HttpResponseRedirect(reverse("item",args=(item_id,)))
-                #return render(request, "auctions/item.html", {
-                #    "message": "Your bid has been set as the current bid = $" + str(new_bid),
-                #    "class": "alert-primary show"
-                #})
             else:
-                request.session['message'] = "Increase your bid."
-                request.session['class'] = "alert-warning show"
-                #return HttpResponseRedirect(reverse("item",args=(item_id,)))
-                #kwargs = {"arg1" : "Geeks", "arg2" : "for", "arg3" : "Geeks"}
-                return HttpResponseRedirect(reverse("item",args=(item_id,)))
+                message = "Increase your bid."
+                message_class = "alert-warning show"
+                return notification(request,message,message_class)
+                
         return HttpResponseRedirect(reverse("login"))    
     return HttpResponseRedirect(reverse("item",args=(item_id,)))
 
@@ -196,16 +201,13 @@ def sell(request):
                 else:
                     item.active = True
                 item.save()
+                message = "Your've sold '"+item.title+"'."
+                message_class = "alert-success show"
+                return notification(request,message,message_class)
             return HttpResponseRedirect(reverse("item",args=(item_id,)))
         return HttpResponseRedirect(reverse("login"))
     return HttpResponseRedirect(reverse("index"))
 
-    '''
-        return render(request, "auctions/item.html", {
-            "message": "Your've sold this listing.",
-            "class": "alert-success show"
-        })
-    '''
 
 # Add Comment
 def post_comment(request):
@@ -273,16 +275,4 @@ def add_to_watchlist(request, item_id):
     else:
         item.wishers.add(request.user)
     item.save()
-    message = "DONE!"
-    notification(request,message)
     return HttpResponseRedirect(reverse("item",args=(item_id,)))
-  
-
-# Show notifications
-def notification(request,message):
-    return render(request, "auctions/notifications.html", {
-        "message": message,
-        "back_url": "#"
-    })
-    return HttpResponseRedirect(reverse("item",args=(item_id,)))
-    
