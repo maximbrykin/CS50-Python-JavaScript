@@ -13,3 +13,7 @@ textarea {
 .read {
     background-color: #f1f1f1;
 }
+
+#reply-button {
+    margin-right: 5px;
+}
