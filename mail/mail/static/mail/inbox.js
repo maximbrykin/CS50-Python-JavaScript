@@ -8,9 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // By default, load the inbox
   load_mailbox('inbox');
-
-  document.querySelector('#compose-form').addEventListener('submit', send_email);
-
 });
 
 
@@ -27,7 +24,9 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
-
+  
+  // On button Send click - Send Email
+  document.querySelector('#compose-form').addEventListener('submit', send_email);
 }
 
 function load_mailbox(mailbox) {
@@ -58,14 +57,14 @@ function load_mailbox(mailbox) {
 
       // Create div for each email
       const div_email = document.createElement('div');
-      div_email.className = 'emails-list';
+      div_email.className = 'emails-list row';
       // Mark grey if an email is read
       if (email.read === true) div_email.className += ' read';
       // Add an email to the list
       if (mailbox === 'sent') 
-      div_email.innerHTML = 'To: <strong>' + email.recipients + '</strong> Subject: <strong>' + email.subject + '</strong> Time: <strong>' + email.timestamp + '</strong>';
+      div_email.innerHTML = '<div class="col-sm-3">' + email.recipients + '</div> <div class="col-sm-7">' + email.subject + '</div> <div class="col-sm-2">' + email.timestamp + '</div>';
       else
-      div_email.innerHTML = 'From: <strong>' + email.sender + '</strong> Subject: <strong>' + email.subject + '</strong> Time: <strong>' + email.timestamp + '</strong>';
+      div_email.innerHTML = '<div class="col-sm-3">' + email.sender + '</div> <div class="col-sm-7">' + email.subject + '</div> <div class="col-sm-2">' + email.timestamp + '</div>';
       document.querySelector('#emails-table').append(div_email); 
       
       // Go to Show an email content
@@ -73,14 +72,11 @@ function load_mailbox(mailbox) {
         read_email(email.id);
         get_email(email.id);
       });
-
     });
   });
-  
-
 }
 
-function send_email() {
+function send_email(event) {
   fetch('/emails', {
     method: 'POST',
     body: JSON.stringify({
@@ -93,8 +89,11 @@ function send_email() {
   .then(result => {
       // Print result
       console.log(result);
+  })
+  .then(() => {
+    load_mailbox('sent')
   });
-  load_mailbox('sent');
+  event.preventDefault();
 }
 
 function get_email(email_id) {
@@ -110,11 +109,11 @@ fetch('/emails/'+email_id)
   document.querySelector('#email-view').style.display = 'block';
   
   // Display an email
-  document.querySelector('#email-view').innerHTML = 'To: <strong>' + email.recipients + '</strong><br>';
-  document.querySelector('#email-view').innerHTML += 'From: <strong>' + email.sender + '</strong><br>';
-  document.querySelector('#email-view').innerHTML += 'Subject: <strong>' + email.subject + '</strong><br>';
-  document.querySelector('#email-view').innerHTML += 'Time: <strong>' + email.timestamp + '</strong><br>';
-  document.querySelector('#email-view').innerHTML += email.body + '<br><br>';
+  document.querySelector('#email-view').innerHTML = '<strong>From: </strong>' + email.sender + '<br>';
+  document.querySelector('#email-view').innerHTML += '<strong>To: </strong>' + email.recipients + '<br>';
+  document.querySelector('#email-view').innerHTML += '<strong>Subject: </strong>' + email.subject + '<br>';
+  document.querySelector('#email-view').innerHTML += '<strong>Timestamp: </strong>' + email.timestamp;
+  document.querySelector('#email-view').innerHTML += '<hr>' + email.body + '<br>';
 
   // Reply button
   const reply_button = document.createElement('button');
@@ -163,7 +162,9 @@ function archive_email(email_id) {
         archived: true
     })
   })
-  load_mailbox('inbox');
+  .then(() => {
+    load_mailbox('inbox')
+  });
 }
 
 function unarchive_email(email_id) {
@@ -173,7 +174,9 @@ function unarchive_email(email_id) {
         archived: false
     })
   })
-  load_mailbox('inbox');
+  .then(() => {
+    load_mailbox('inbox')
+  });
 }
 
 function reply_email(reply_recipients, reply_subject, reply_body, reply_date) {
@@ -185,11 +188,14 @@ function reply_email(reply_recipients, reply_subject, reply_body, reply_date) {
   
   // Reply content
   document.querySelector('#compose-recipients').value = reply_recipients;
-  console.log(reply_subject.slice(0, 4));
-  if (reply_subject.slice(0, 4) != 'Re: ') {
-    document.querySelector('#compose-subject').value = 'Re: ';
+  if (reply_subject.slice(0, 4) !== 'Re: ') {
+    document.querySelector('#compose-subject').value = 'Re: ' + reply_subject;
   }
-  document.querySelector('#compose-subject').value += reply_subject;
-  document.querySelector('#compose-body').value = 'On ' + reply_date + ' ' + reply_recipients + ' wrote: \n' + reply_body;
+  else {
+    document.querySelector('#compose-subject').value = reply_subject;
+  }
+  document.querySelector('#compose-body').value = '\n ------------------ \n On ' + reply_date + ' ' + reply_recipients + ' wrote: \n' + reply_body;
 
+  // On button Send click - Send Email
+document.querySelector('#compose-form').addEventListener('submit', send_email);
 }
