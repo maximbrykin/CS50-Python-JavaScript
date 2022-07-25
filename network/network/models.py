@@ -7,6 +7,7 @@ from django.db import models
 class User(AbstractUser):
     pass
 
+
 class Follower(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     follow = models.ManyToManyField(User, blank=True, related_name="followed")
@@ -18,14 +19,14 @@ class Follower(models.Model):
             "mood": self.mood,
             "followed_by_num": self.follow.count(),
             "follows_num": self.user.followed.count(),
-            "is_following":  (not user.is_anonymous) and self in user.followed.all(),
-            "can_follow": (not user.is_anonymous) and self.user != user
+            "is_following":  (not user.is_anonymous) and (self in user.followed.all()),
+            "can_be_followed": (not user.is_anonymous) and (self.user != user)
         }
     def __str__(self):
         followers = ""
         for follower in self.follow.all():
             followers += " " + follower.username
-        return f"{self.user.username} - id:{self.user.id} - follows: {followers}"
+        return f"{self.user.username} - id:{self.user.id} - is followed by: {followers}"
 
 
 class Post(models.Model):
@@ -37,11 +38,11 @@ class Post(models.Model):
         return {
             "id": self.id,
             "content": self.content,
-            "date": self.date.strftime("%b %#d %Y, %#I:%M %p"),
             "author_id": self.author.id,
             "author": self.author.user.username,
+            "date": self.date.strftime("%b %#d %Y, %#I:%M %p"),
             "likes": self.liked.count(),
-            #"liked": self in Follower.objects.filter(user=user).first().likes().all() and (not user.is_anonymous),
+            "liked_by": (not user.is_anonymous) and (self in Follower.objects.filter(user=user).first().likes.all()),
             "can_edit": self.author.user == user
         }
     def __str__(self):
