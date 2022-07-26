@@ -3,8 +3,9 @@ body {
     color: #fff;
 }
 
-p {
-color: #333;
+.post-content, .post-date, .like-num {
+    color: #333;
+    margin-bottom: 10px;
 }
 
 .navbar-light .navbar-brand, .navbar-light .navbar-nav .nav-link, #info {

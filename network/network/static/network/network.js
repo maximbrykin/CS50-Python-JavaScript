@@ -2,29 +2,84 @@ document.addEventListener('DOMContentLoaded', function() {
     //window.history.pushState('Network','Network','http://127.0.0.1:8000/')
 
     document.querySelector('#user-info').style.display = 'none';
-    
-    all_posts();
-    //profile(1);
+    document.querySelector('h1').innerHTML = 'All Posts:';
+
+    load_posts('', 1);
 
     // Menu clicks
+    // Profile
     if (document.getElementById('profile')) {
         document.querySelector('#profile').addEventListener("click", (p) => profile(p.target.closest("#profile").dataset.user_id));    
     } 
+    // Following
     if (document.getElementById('following')) {
-        document.querySelector('#following').addEventListener("click", () => following_posts());
+        document.querySelector('#following').addEventListener("click", () => {
+            document.querySelector('#user-info').innerHTML = ``;
+            document.querySelector('h1').innerHTML = 'People you follow wrote:';
+            load_posts('/following', 1);
+        });
     } 
-    document.querySelector('#homepage').addEventListener("click", () => all_posts());
-
-   
+    // All Posts
+    document.querySelector('#homepage').addEventListener("click", () => {
+        document.querySelector('#user-info').innerHTML = ``;
+        load_posts('', 1);
+    });
 });
 
 
-function profile(user_id){
-    
-    // Show profile div and hide other divs
-    document.querySelector('#user-info').style.display = 'block';
+function paginator(scope, page, num_pages){
+    page_list = document.getElementById('pagination');
+    page_list.innerHTML = "";
+    // Previous button
+    const prev = document.createElement('li');
+    if (page == 1){
+        prev.className = "page-item disabled";
+    } else {
+        prev.className = "page-item";
+        prev.addEventListener('click', () => load_posts(scope, page-1))
+    }
+    const prev_link = document.createElement('a');
+    prev_link.className = "page-link";
+    prev_link.href = "#";
+    prev_link.innerHTML = "Previous";
+    prev.append(prev_link);
+    page_list.append(prev);
+    // Page numbers
+    for (let item=1; item<=num_pages; item++) {
+        const page_num = document.createElement('li');
+        if (item == page) {
+            page_num.className = "page-item active";
+        } else {
+            page_num.className = "page-item";
+            page_num.addEventListener('click', () => load_posts(scope, item));
+        }
+        const page_link = document.createElement('a');
+        page_link.className = "page-link";
+        page_link.href = "#";
+        page_link.innerHTML = item;
+        page_num.append(page_link);
+        page_list.append(page_num);
+    }
+    // Next button
+    const next = document.createElement('li');
+    if (page == num_pages){
+        next.className = "page-item disabled"
+    } else {
+        next.className = "page-item";
+        next.addEventListener('click', () => load_posts(scope, page+1))
+    }
+    const next_link = document.createElement('a');
+    next_link.className = "page-link";
+    next_link.href = "#";
+    next_link.innerHTML = "Next";
+    next.append(next_link);
+    page_list.append(next);
+}
 
-    // Clear profile div
+
+function profile(user_id){ 
+    document.querySelector('#user-info').style.display = 'block';
+    document.querySelector('h1').remove();
     document.querySelector('#user-info').innerHTML = ``;
     document.querySelector('#posts').innerHTML = ``;
     // Create profile structure
@@ -36,7 +91,7 @@ function profile(user_id){
     document.querySelector('#user-info').append(userposts);
 
     show_user_info(user_id);
-    show_user_posts(user_id);
+    load_posts(`/${user_id}`, 1);
 }
 
 
@@ -45,7 +100,6 @@ function show_user_info(user_id){
     fetch(`/profile/${user_id}`)
     .then(response => response.json())
     .then(userdata => {
-        console.log(userdata);
         // Display Username
         const username = document.createElement('h1')
         username.innerHTML = userdata.username
@@ -65,7 +119,7 @@ function show_user_info(user_id){
         followed.id = 'followed'
         followed.innerHTML = 'Followed by: ' + userdata.followed_by_num
         document.querySelector('#username').append(followed);
-        // Display follow button
+        // Display follow/unfollow button
         const follow = document.createElement('button')
         follow.id = 'follow_button'
         follow.className = 'btn btn-light'
@@ -89,84 +143,29 @@ function show_user_info(user_id){
 }
     
 
-function show_user_posts(user_id){
-    fetch(`/posts/${user_id}`)
-    .then(response => response.json())
-    .then(userposts => show_posts(userposts))
-}
-
-
-function all_posts(){
-    document.querySelector('#user-info').style.display = 'none';
-
-    document.querySelector('#posts').innerHTML = ``;
-
-    const h1 = document.createElement('h1')
-    h1.innerHTML = 'All Posts'
-    document.querySelector('#posts').append(h1);
-
-    const allpostsdiv = document.createElement('div')
-    allpostsdiv.id = 'user-posts'
-    document.querySelector('#posts').append(allpostsdiv);
-
-    show_all_posts();
-}
-
-
-function show_all_posts(){
-    fetch('/allposts')
-    .then(response => response.json())
-    .then(allposts => show_posts(allposts))
-}
-
-
-function following_posts(){
-    document.querySelector('#posts').style.display = 'block';
-
-    document.querySelector('#posts').innerHTML = ``;
-    document.querySelector('#user-info').innerHTML = ``;
-
-
-    const h1 = document.createElement('h1')
-    h1.innerHTML = 'People you follow wrote:'
-    document.querySelector('#posts').append(h1);
-
-    const followingposts = document.createElement('div')
-    followingposts.id = 'user-posts'
-    document.querySelector('#posts').append(followingposts);
-
-    show_following_posts();
-}
-
-
-function show_following_posts(){
-    fetch('/following_posts')
-    .then(response => response.json())
-    .then(following => show_posts(following))
-}
-
-
 function show_posts(posts){
-    //console.log(posts)
+    console.log(posts)
     // Display posts
     posts.forEach(userpost => {
         
         const post = document.createElement('div')
         post.id = `post_${userpost.id}`
         post.className = 'single-post'
-        // Username row
+        // Username
         const username = document.createElement('div')
         username.id = `user`;
         username.innerHTML = '<p><strong><a href="#" onclick="profile('+ userpost.author_id + ')">' + userpost.author + '</a></strong></p>'
         post.append(username);
-        // Content row
+        // Content
         const content = document.createElement('div')
         content.id = `content_${userpost.id}`;
-        content.innerHTML = '<p>' + userpost.content + '</p>'
+        content.className = "post-content"
+        content.innerHTML = userpost.content
         post.append(content);
-        // Date row
+        // Date
         const date = document.createElement('div')
         date.id = `date_${userpost.id}`;
+        date.className = "post-date"
         date.innerHTML = '<p class="small">' + userpost.date + '</p>';
         post.append(date);
         // Edit button
@@ -178,7 +177,7 @@ function show_posts(posts){
             edit_btn.addEventListener('click', () => edit_post(userpost));
             post.append(edit_btn);
         }
-        // Like row
+        // Like
         const likes_row = document.createElement('div')
         likes_row.id = `likes_${userpost.id}`;
         // Like icon
@@ -202,13 +201,33 @@ function show_posts(posts){
         like_num.id = `like_num_${userpost.id}`;
         like_num.className = 'like-num';
         like_num.innerHTML = likes;
-        // Combine Divs for a like row
+
         likes_row.append(like_icon);
         likes_row.append(like_num);
         post.append(likes_row);
 
-        document.querySelector('#user-posts').append(post);
+        document.querySelector('#posts').append(post);
     });    
+}
+
+
+function load_posts(scope, page) {
+    if (scope.includes("?")) {
+        scope += `&page=${page}`;
+    } else {
+        //document.querySelector('#profile').style.display = "none";
+        scope += `?page=${page}`;
+    }
+    console.log(`access ${scope}`);
+    fetch(`/posts${scope}`)
+    .then(response => response.json())
+    .then(response => {
+        document.getElementById('posts').innerHTML = "";
+        paginator(scope, page, response.page_nums);
+        //response.posts_list.forEach(post => show_posts(post));
+        //console.log(response.posts_list);
+        show_posts(response.posts_list);
+    });
 }
 
 
@@ -219,7 +238,6 @@ function edit_post(post){
     const edit_btn = document.getElementById(`edit_btn_${post.id}`);
     const post_body = content.parentNode;
     
-    
     // Edit buttons
     const edit_btns = document.createElement('div');
     //Save button
@@ -229,10 +247,6 @@ function edit_post(post){
     save_button.innerHTML = "Save";
     save_button.addEventListener('click', () => {
         const new_content = document.getElementById(`new_content_${post.id}`).value;
-        /*body = JSON.stringify({
-            post_id: post.id,
-            new_content: new_content});
-        console.log(body);*/
         fetch(`/save_post`, {
             method: 'PUT',
             headers: {
@@ -259,9 +273,8 @@ function edit_post(post){
         });
     });
 
-    const content_editable = document.createElement('input');
+    const content_editable = document.createElement('textarea');
     content_editable.id = `new_content_${post.id}`;
-    content_editable.type = "textarea";
     content_editable.className = "form-control";
     content_editable.value = content.innerHTML;
 
@@ -277,7 +290,7 @@ function edit_post(post){
     // Cancel button
     const cancel_btn = document.createElement('button');
     cancel_btn.type = "button";
-    cancel_btn.className = "btn btn-danger";
+    cancel_btn.className = "btn btn-light";
     cancel_btn.innerHTML = "Cancel";
     cancel_btn.addEventListener('click', () => {
         edit_btns.remove();
@@ -290,6 +303,7 @@ function edit_post(post){
     edit_btns.append(cancel_btn);
     post_body.appendChild(edit_btns);
 }
+
 
 function set_like(post){
     fetch(`/post/${post.id}/set_like`)
@@ -304,7 +318,7 @@ function set_like(post){
     })
 }
 
-// Follow or unfollow
+
 function follow_unfollow(user_id){
     fetch(`/profile/${user_id}/follow`)
     .then(response => response.json())
