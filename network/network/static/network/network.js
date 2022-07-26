@@ -79,7 +79,6 @@ function paginator(scope, page, num_pages){
 
 function profile(user_id){ 
     document.querySelector('#user-info').style.display = 'block';
-    document.querySelector('h1').remove();
     document.querySelector('#user-info').innerHTML = ``;
     document.querySelector('#posts').innerHTML = ``;
     // Create profile structure
@@ -101,7 +100,7 @@ function show_user_info(user_id){
     .then(response => response.json())
     .then(userdata => {
         // Display Username
-        const username = document.createElement('h1')
+        const username = document.createElement('h2')
         username.innerHTML = userdata.username
         document.querySelector('#username').append(username)
         // Display Mood
@@ -136,9 +135,7 @@ function show_user_info(user_id){
         document.querySelector('#username').append(follow);
         document.querySelector('#follow_button').addEventListener("click", () => follow_unfollow(user_id));
         // Display User's posts title
-        const yourposts = document.createElement('h3')
-        yourposts.innerHTML = '<br>' + userdata.username + '`s posts:'
-        document.querySelector('#username').append(yourposts);            
+        document.querySelector('h1').innerHTML = '<br>' + userdata.username + '`s posts:'         
     });
 }
     
