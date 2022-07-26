@@ -144,7 +144,7 @@ function show_user_info(user_id){
     
 
 function show_posts(posts){
-    console.log(posts)
+    //console.log(posts)
     // Display posts
     posts.forEach(userpost => {
         
@@ -215,17 +215,13 @@ function load_posts(scope, page) {
     if (scope.includes("?")) {
         scope += `&page=${page}`;
     } else {
-        //document.querySelector('#profile').style.display = "none";
         scope += `?page=${page}`;
     }
-    console.log(`access ${scope}`);
     fetch(`/posts${scope}`)
     .then(response => response.json())
     .then(response => {
         document.getElementById('posts').innerHTML = "";
         paginator(scope, page, response.page_nums);
-        //response.posts_list.forEach(post => show_posts(post));
-        //console.log(response.posts_list);
         show_posts(response.posts_list);
     });
 }
