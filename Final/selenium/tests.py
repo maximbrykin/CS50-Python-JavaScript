@@ -9,7 +9,7 @@ def file_uri(filename):
     return pathlib.Path(os.path.abspath(filename)).as_uri()
 
 
-driver = webdriver.Chrome()
+driver = webdriver.Chrome('C:/Users/Brykin_MP/AppData/Local/Programs/Python/Python310/lib/site-packages/selenium/webdriver/webdriver.py')
 
 
 class WebpageTests(unittest.TestCase):
