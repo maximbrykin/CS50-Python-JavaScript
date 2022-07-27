@@ -28,7 +28,7 @@ class FlightTestCase(TestCase):
     def test_valid_flight(self):
         a1 = Airport.objects.get(code="AAA")
         a2 = Airport.objects.get(code="BBB")
-        f = Flight.objects.get(origin=a1, destination=a2, duration=101)
+        f = Flight.objects.get(origin=a1, destination=a2, duration=100)
         self.assertTrue(f.is_valid_flight())
 
     def test_invalid_flight_destination(self):
